@@ -11,9 +11,10 @@ public class AreaSplitController : MonoBehaviour
     public Text 文字;
     public Image 装饰圈;
     public GameObject InfoPrefab;
+    List<Tween> tweenersList = new List<Tween>();
     GameObject info;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         定位 = transform.Find("定位");
         定位背景 = transform.Find("文字背景").GetComponent<Image>();
@@ -28,10 +29,10 @@ public class AreaSplitController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Control(true);
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    Control(true);
+        //}   
     }
     
     public void Control(bool b)
@@ -40,12 +41,16 @@ public class AreaSplitController : MonoBehaviour
         定位背景.DOFillAmount(0, 0);
         文字.DOFade(0, 0);
         装饰圈.DOFade(0, 0);
+        foreach(Tween tweener in tweenersList)
+        {
+            tweener.Kill();     
+        }      
         if (b)
         {
-            定位.DOScale(new Vector3(2, 4, 2), 0.5f);
-            装饰圈.DOFade(1, 0.5f);
-            定位背景.DOFillAmount(1, 0.7f);
-            文字.DOFade(1, 1);    
+            tweenersList.Add( 定位.DOScale(new Vector3(2, 4, 2), 0.5f));
+            tweenersList.Add(装饰圈.DOFade(1, 0.5f));
+            tweenersList.Add(定位背景.DOFillAmount(1, 0.7f));
+            tweenersList.Add(文字.DOFade(1, 1));    
         }
     }
     public void ControlInfo(bool b,string _人口,string _面积,string _消费)
