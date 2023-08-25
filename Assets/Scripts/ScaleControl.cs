@@ -17,11 +17,11 @@ public class ScaleControl : MonoBehaviour
 
     public GameObject InfoPrefab;
 
-    List<Tween> tweens = new List<Tween>(); 
+    List<Tween> tweens = new List<Tween>();
 
     GameObject Info;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         男性柱状图 = transform.Find("男性柱状图");
         女性柱状图 = transform.Find("女性柱状图");
@@ -32,7 +32,7 @@ public class ScaleControl : MonoBehaviour
         地名 = transform.Find("Canvas/文字背景/地名背景/地名字").GetComponent<Text>();
         底座特效 = transform.Find("柱状图底座特效").gameObject;
 
-        Info = GameObject.Instantiate(InfoPrefab,文字背景.transform.parent);
+        Info = GameObject.Instantiate(InfoPrefab, 文字背景.transform.parent);
 
         Init();
     }
@@ -55,11 +55,11 @@ public class ScaleControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode  .T))
+        if (Input.GetKeyDown(KeyCode.T))
         {
-            this.Control(true,Random.Range(1,5), Random.Range(1, 5), Random.Range(100, 200), Random.Range(100, 200));
-        }   
-        
+            this.Control(true, Random.Range(1, 5), Random.Range(1, 5), Random.Range(100, 200), Random.Range(100, 200));
+        }
+
     }
     /// <summary>
     /// 
@@ -70,15 +70,13 @@ public class ScaleControl : MonoBehaviour
     /// <param name="MaleCount">女性销售额</param>
     /// <param name="FeMaleCount">男性销售额</param>
 
-    public void Control(bool b,float MaleRate,float FeMaleRate,float MaleCount,float FeMaleCount)
+    public void Control(bool b, float MaleRate, float FeMaleRate, float MaleCount, float FeMaleCount)
     {
         Init();
-        foreach(Tween tween in tweens)
+        foreach (Tween tween in tweens)
         {
             tween.Kill();
-            tweens.Remove(tween);
         }
-        Debug.Log("tweens.Count : " + tweens.Count);
         if (b)
         {
             文字.text = (MaleCount + FeMaleCount).ToString("f2");
@@ -90,22 +88,21 @@ public class ScaleControl : MonoBehaviour
             tweens.Add(地名背景.DOFade(1, 0.5f));
             tweens.Add(地名.DOFade(1, 0.5f).SetDelay(0.2f));
             tweens.Add(文字背景.DOFade(1, 0.5f).SetDelay(0.4f));
-            tweens.Add(文字.DOFade(1,0.5f).SetDelay(0.6f));
+            tweens.Add(文字.DOFade(1, 0.5f).SetDelay(0.6f));
             tweens.Add(装饰圈.DOFade(1, 0.5f).SetDelay(0.4f));
 
-
-            tweens.Add(男性柱状图.DOScaleY(MaleCount, 1).SetDelay(1));
-            tweens.Add(女性柱状图.DOScaleY(FeMaleRate, 1).SetDelay(1));
-            tweens.Add(Info.transform.DOScale(new Vector3(0.6f,0.6f,0.6f), 0.5f).SetDelay(1.5f));   
+            tweens.Add(男性柱状图.DOScaleY(MaleRate * 10, 1).SetDelay(1));
+            tweens.Add(女性柱状图.DOScaleY(FeMaleRate * 10, 1).SetDelay(1));
+            tweens.Add(Info.transform.DOScale(new Vector3(0.6f, 0.6f, 0.6f), 0.5f).SetDelay(1.5f));
         }
     }
-    public void ControlInfo(bool b,float MaleCount,float feMaleCount,List<float> _柱状图,List<string> _类别值)
+    public void ControlInfo(bool b, float MaleCount, float feMaleCount, List<float> _柱状图 = null, List<string> _类别值 = null)
     {
-        Info.transform.DOScale(Vector3.zero, 0);
+        tweens.Add(Info.transform.DOScale(Vector3.zero, 0));
         if (b)
         {
-            Info.transform.DOScale(new Vector3(0.6f, 0.6f, 0.6f), 0.5f).SetDelay(1.5f);
+            tweens.Add(Info.transform.DOScale(new Vector3(0.6f, 0.6f, 0.6f), 0.5f).SetDelay(1.5f));
         }
-        Info.GetComponent<ScaleCounter>().SetInfo(b,MaleCount.ToString(),feMaleCount.ToString(), _柱状图, _类别值);
+        Info.GetComponent<ScaleCounter>().SetInfo(b, MaleCount.ToString(), feMaleCount.ToString(), _柱状图, _类别值);
     }
 }

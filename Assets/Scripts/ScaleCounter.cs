@@ -11,7 +11,7 @@ public class ScaleCounter : MonoBehaviour
     public Image[] 柱状图;
     public Text[] 类别值;
     public Text[] 数值;
-    public List<Tween> tweens;
+    public List<Tween> tweens = new List<Tween>();
     // Start is called before the first frame update
     void Start()
     {
@@ -29,26 +29,30 @@ public class ScaleCounter : MonoBehaviour
         {
             柱状图[i].DOFillAmount(0, 0);
             类别值[i].DOFade(0, 0);
-            数值[i].DOFade(0, 0);     
+            数值[i].DOFade(0, 0);
         }
-        foreach(Tween tween in tweens)
+        foreach (Tween tween in tweens)
         {
             tween.Kill();
-            tweens.Remove(tween);   
+            tweens.Remove(tween);
         }
         if (b)
         {
             男性销售额.text = "男性消费额：" + _男性消费额 + "万元";
-            女性销售额.text = "女性消费额：" + _女性销售额 + "万元";  
-            for (int i = 0; i < 柱状图.Length; i++)
+            女性销售额.text = "女性消费额：" + _女性销售额 + "万元";
+            if (_柱状图 != null)
             {
-                类别值[i].text = _类别值[i];
-                数值[i].text = _柱状图[i].ToString();
-                tweens.Add(类别值[i].DOFade(1, 0.5f).SetDelay(1));
-                tweens.Add(数值[i].DOFade(1, 0.5f).SetDelay(1));
-                tweens.Add(柱状图[i].DOFillAmount(_柱状图[i], 1f).SetDelay(2));
+                for (int i = 0; i < 柱状图.Length; i++)
+                {
+                    类别值[i].text = _类别值[i];
+                    数值[i].text = _柱状图[i].ToString();
+                    tweens.Add(类别值[i].DOFade(1, 0.5f).SetDelay(1));
+                    tweens.Add(数值[i].DOFade(1, 0.5f).SetDelay(1));
+                    tweens.Add(柱状图[i].DOFillAmount(_柱状图[i], 1f).SetDelay(2));
 
+                }
             }
+
         }
     }
 }
