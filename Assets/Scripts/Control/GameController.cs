@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+using SimpleJSON;
 
 public enum sceneType
 {
@@ -21,6 +22,7 @@ public class GameController : MonoBehaviour
     public Text 区域划分英文;
     public Image 区域划分背景;
     public Vector3 OldTarget;
+    public AreaSplitJsonInfo areaSplitJsonInfo = new();
     [Header("<<<销售情况>>>")]
     public Gradient Gradient;
     public MeshRenderer[] meshRenders;
@@ -49,8 +51,9 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("start");
         InitScene();
+        // 携程 区域划分数据解析
+        StartCoroutine(GetHttpJson_AreaSplitJsonInfo());
     }
 
     // Update is called once per frame
@@ -70,6 +73,32 @@ public class GameController : MonoBehaviour
         }
         RayCastMethod();
     }
+
+    IEnumerator GetHttpJson_AreaSplitJsonInfo()
+    {
+        UnityWebRequest webRequest = UnityWebRequest.Get("https://www.fastmock.site/mock/bc3782ee2b2804b36999cb3144f15ee6/DataVoss/AreaSplitInfo");
+        yield return webRequest.SendWebRequest();
+        if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+        {
+            Debug.LogError(webRequest.error);
+        }
+        else
+        {
+            areaSplitJsonInfo = JsonUtility.FromJson<AreaSplitJsonInfo>(webRequest.downloadHandler.text);
+            for (int i = 0; i < areaSplitControllers.Count; i++)
+            {
+                for (int j = 0; j < areaSplitJsonInfo.区域情况列表.Count; j++)
+                {
+                    string strName = areaSplitControllers[i].name.Split("_")[1].Substring(4);
+                    if (strName == areaSplitJsonInfo.区域情况列表[j].区域名称)
+                    {
+                        areaSplitControllers[i].SetInfo(areaSplitJsonInfo.区域情况列表[j].区域人数, areaSplitJsonInfo.区域情况列表[j].区域面积, areaSplitJsonInfo.区域情况列表[j].区域消费);
+                    }
+                }
+            }
+        }
+    }
+
     void RayCastMethod()
     {
         if (Input.GetMouseButtonDown(0))
@@ -81,8 +110,6 @@ public class GameController : MonoBehaviour
                 {
                     if (hit.transform.tag == "区域划分")
                     {
-
-
                         TweenerPos.Kill();
                         smoothCameraOrbit.xDeg = Random.Range(170f, 185f);
                         smoothCameraOrbit.yDeg = Random.Range(45f, 50f);
@@ -94,12 +121,12 @@ public class GameController : MonoBehaviour
                             if (hit.transform.name == areaSplitController.name.Split("_")[1].Substring(4))
                             {
                                 areaSplitController.Control(true);
-                                areaSplitController.ControlInfo(true, Random.Range(500f, 1200f).ToString(), Random.Range(500f, 1200f).ToString(), Random.Range(500f, 1200f).ToString());
+                                areaSplitController.ControlInfo(true);
                             }
                             else
                             {
                                 areaSplitController.Control(false);
-                                areaSplitController.ControlInfo(false, null, null, null);
+                                areaSplitController.ControlInfo(false);
                             }
 
                         }
@@ -172,7 +199,7 @@ public class GameController : MonoBehaviour
         areaSplitControllers.ForEach(areaSplitController =>
         {
             areaSplitController.Control(false);
-            areaSplitController.ControlInfo(false, null, null, null);
+            areaSplitController.ControlInfo(false);
         });
         // 销售情况
         销售情况中文.DOFade(0, 0);
